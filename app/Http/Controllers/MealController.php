@@ -21,6 +21,7 @@ class MealController extends Controller
         $lang = request('lang');
         $with = request('with');
         $tags = request('tags');
+
         
         if($tags){
             $tags = explode(',',$tags);
@@ -33,6 +34,19 @@ class MealController extends Controller
                         $query->select('id','title','slug');
                     }))->get();
                 }
+                /*pokušaj : with(array(explode(',',$with)=>function ($query){ --> omogućilo bi jednostavnost...
+                        $query->select('id','title','slug');
+                    }))
+                    
+                kada koristim Meal::select('id','title','description')->where('id',$meal->id)->with(array('category','tags','ingredients'=>function ($query){
+                        $query->select('id','title','slug');
+                    }))->get();
+                ne dobivam rezultate za category i tags
+
+                whereIn('id',$tags) ako je više tagova nisam uspio daobiti rezultate one koje sadrzavaju obavezno oba taga
+
+                nisam uspio saznat kako da izbacim custom query rezultat na osnovu diff_timea, deleted_at... dio sa status : kreiran modificiran obrisan
+                */
                 return $meals;
             }else if(in_array('tags',explode(',',$with)) && in_array('ingredients',explode(',',$with))){
                 $meals = [];

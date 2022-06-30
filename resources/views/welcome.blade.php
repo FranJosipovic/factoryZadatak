@@ -17,6 +17,10 @@
         </style>
     </head>
     <body>
-        
+        Rješavanje ovog zadatka je moje prvo iskustvo ikad sa PHP-om, a pogotovo sa laravelom<br/>
+        Problemi na koje sam naišao:<br/>
+        -Nisam uspio instalirati Fzaninotto/faker”, pa sam svojim custom seederima popunio bazu</br>
+        -rjesavanje multijezičnog dijela zadatka </br>
+        -queryanje - komentari u MealControlleru
     </body>
 </html>
