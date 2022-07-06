@@ -14,4 +14,3 @@ use App\Http\Controllers\MealController;
 */
 
 Route::get('/', [MealController::class,'index']);
-Route::get('/meals', [MealController::class,'show']);

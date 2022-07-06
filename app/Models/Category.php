@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     use HasFactory;
-    
+    protected $hidden = ['created_at','deleted_at','updated_at','pivot'];
 }

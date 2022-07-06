@@ -9,6 +9,7 @@ use App\Models\Tag;
 use App\Models\Category;
 use App\Models\Ingredient;
 use Mockery\Undefined;
+use Validator;
 
 class MealController extends Controller
 {
@@ -16,99 +17,64 @@ class MealController extends Controller
         return view('welcome');
     }
 
-    public function show(){
+    public function show(Request $req){
+
+        /*
+            --koliko sam shvatio treba za validaciju postaviti da j elang required, ako treba još nešta dodao bi to u $rules
+            --napravio sam observer i napravio potrebne promjene u EventServiceProvider, zbog linije koda u boot funkciji ne radi program pa sam ga zakomentiro i zbog
+            toga sam manualno updato status u tablici u bazi podataka na 'deleted' za one koji su obrisani
+            --ako nema with parametra javlja gresku pa sam morao dodati dodatne if else uvjete, vjerujem da se moglo drukcije i jednostavnije
+        */
+
+        $rules = array(
+            "lang"=>"required"
+        );
+
+        $validator = Validator::make($req->all(),$rules);
+        if($validator->fails()){
+            return $validator->errors();
+        }
 
         $lang = request('lang');
         $with = request('with');
         $tags = request('tags');
+        $category = request('category');
+        $diff_time = request('diff_time');
 
-        
         if($tags){
-            $tags = explode(',',$tags);
-            $tagWithMeals = Tag::with('meals')->whereIn('id',$tags)->get()->first();
+            $tagWithMeals = Tag::with('meals')->whereIn('id',[$tags])->get()->first();
             $mealsArray = $tagWithMeals->meals;
-            if(in_array('tags',explode(',',$with)) && in_array('ingredients',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $meals = [];
+            if($with){
                 foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->with(array('category','tags','ingredients'=>function ($query){
-                        $query->select('id','title','slug');
-                    }))->get();
+                    $meals[] = Meal::where('id',$meal->id)->with(explode(",",$with))->get();
                 }
-                /*pokušaj : with(array(explode(',',$with)=>function ($query){ --> omogućilo bi jednostavnost...
-                        $query->select('id','title','slug');
-                    }))
-                    
-                kada koristim Meal::select('id','title','description')->where('id',$meal->id)->with(array('category','tags','ingredients'=>function ($query){
-                        $query->select('id','title','slug');
-                    }))->get();
-                ne dobivam rezultate za category i tags
-
-                whereIn('id',$tags) ako je više tagova nisam uspio daobiti rezultate one koje sadrzavaju obavezno oba taga
-
-                nisam uspio saznat kako da izbacim custom query rezultat na osnovu diff_timea, deleted_at... dio sa status : kreiran modificiran obrisan
-                */
-                return $meals;
-            }else if(in_array('tags',explode(',',$with)) && in_array('ingredients',explode(',',$with))){
-                $meals = [];
-                foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->with(array('tags','ingredients'=>function ($query){
-                        $query->select('id','title','slug');
-                    }))->get();
-                }
-                return $meals;
-            }else if(in_array('tags',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $meals = [];
-                foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->with(array('category','tags'=>function ($query){
-                        $query->select('id','title','slug');
-                    }))->get();
-                }
-                return $meals;
-            }else if(in_array('ingredients',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $meals = [];
-                foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->with(array('category','ingredients'=>function ($query){
-                        $query->select('id','title','slug');
-                    }))->get();
-                }
-                return $meals;
             }else{
-                $meals = [];
                 foreach($mealsArray as $meal){
                     $meals[] = Meal::where('id',$meal->id)->get();
                 }
-                return $meals;
             }
-        }else{
-            $mealsArray = [];
         }
-
-        if($category = request('category')){
-            if(in_array('tags',explode(',',$with)) && in_array('ingredients',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $arrayByCategory = Meal::where('category_id',$category)->with(array('category','tags','ingredients'=>function ($query){
-                    $query->select('id','title','slug');
-                }))->get()->toArray();
-            }else if(in_array('tags',explode(',',$with)) && in_array('ingredients',explode(',',$with))){
-                $arrayByCategory = Meal::where('category_id',$category)->with(array('tags','ingredients'=>function ($query){
-                    $query->select('id','title','slug');
-                }))->get()->toArray();
-            }else if(in_array('tags',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $arrayByCategory = Meal::where('category_id',$category)->with(array('category','tags'=>function ($query){
-                    $query->select('id','title','slug');
-                }))->get()->toArray();
-            }else if(in_array('ingredients',explode(',',$with)) && in_array('category',explode(',',$with))){
-                $arrayByCategory = Meal::where('category_id',$category)->with(array('category','ingredients'=>function ($query){
-                    $query->select('id','title','slug');
-                }))->get()->toArray();
+        
+        if($category){
+            if($with){
+                $meals[] = Meal::where("category_id",$category)->with(explode(",",$with))->get();
             }else{
-                $arrayByCategory = Meal::where('category_id',$category)->get()->toArray();
+                $meals[] = Meal::where("category_id",$category)->get();
             }
-        }else{
-            $arrayByCategory = [];
         }
-        $meals = array_merge($mealsArray,$arrayByCategory);
+        
+        if($diff_time){
+            if($with){
+                $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->with(explode(",",$with))->get();
+            }
+            else{
+                $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->get();
+            }
+        }
 
-        $totalItems = count($mealsArray) + count($arrayByCategory);
+        
+
+        $totalItems = count($mealsArray);
 
         if($items_per_page = request('per_page') && $currentPage = request('page')){
             $totalPages = $items_per_page > $totalItems ? 1 : $totalItems%$items_per_page + floor($totalItems/$items_per_page);
@@ -128,8 +94,7 @@ class MealController extends Controller
             $next = null;
             $items_per_page = $totalItems;
         }        
-
-        return json_encode(['meta'=>['currentPage'=>$currentPage,'totalItems'=>$totalItems,'totalPages'=>$totalPages,'itemsPerPage'=>$items_per_page],'data'=>[$meals],'links'=>['prev'=>$prev,'self'=>$self,'next'=>$next],]);
+        return ['meta'=>['currentPage'=>$currentPage,'totalItems'=>$totalItems,'totalPages'=>$totalPages,'itemsPerPage'=>$items_per_page],'data'=>$meals,'links'=>['prev'=>$prev,'self'=>$self,'next'=>$next]];
         
     }
 }

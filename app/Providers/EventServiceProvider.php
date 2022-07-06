@@ -6,9 +6,14 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Observers\MealObserver;
+use App\Models\Meal;
 
 class EventServiceProvider extends ServiceProvider
 {
+    protected $observers = [
+        Meal::class => [MealObserver::class],
+    ];
     /**
      * The event to listener mappings for the application.
      *
@@ -27,7 +32,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        //Meal::observe(Meal::class);
     }
 
     /**
