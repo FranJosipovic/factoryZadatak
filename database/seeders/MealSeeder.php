@@ -18,13 +18,22 @@ class MealSeeder extends Seeder
     public function run()
     {
         //factory(Meal::class,10)->create();
-        for($i=0;$i<20;$i++){
-            DB::table('meals')->insert([
-                'title' => 'Title of Meal number - '. $i+1,
-                'description' => 'Description of Meal number - '. $i+1,
-                'category_id' => rand(1,20)
-            ]);
+        $meals = Meal::all();
+        foreach($meals as $meal){
+            $meal->fill([
+                'en' => [
+                    'title' => "English translation of title, meal id - {$meal->id}",
+                    'description' => "English translation of description, meal id - {$meal->id}"
+                  ],
+                'de' => [
+                    'title' => "Deutsche Übersetzung von Titel, Mahlzeit-id - {$meal->id}",
+                    'description' => "Deutsche Ubersetzung von Beschreibung, Mahlzeit-id - {$meal->id}"
+                ],
+                'hr' => [
+                    'title' => "hrvatski prijevod naslova, id jela - {$meal->id}",
+                    'description' => "hrvatski prijevod opisa, id jela - {$meal->id}"
+                ]
+                ]);
         }
-
     }
 }

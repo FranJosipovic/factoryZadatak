@@ -3,12 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Meal;
-use App\Models\Tag;
-use App\Models\Category;
-use App\Models\Ingredient;
-use Mockery\Undefined;
 use Validator;
 
 class MealController extends Controller
@@ -18,14 +13,12 @@ class MealController extends Controller
     }
 
     public function show(Request $req){
-
         /*
             --koliko sam shvatio treba za validaciju postaviti da j elang required, ako treba još nešta dodao bi to u $rules
             --napravio sam observer i napravio potrebne promjene u EventServiceProvider, zbog linije koda u boot funkciji ne radi program pa sam ga zakomentiro i zbog
             toga sam manualno updato status u tablici u bazi podataka na 'deleted' za one koji su obrisani
             --ako nema with parametra javlja gresku pa sam morao dodati dodatne if else uvjete, vjerujem da se moglo drukcije i jednostavnije
         */
-
         $rules = array(
             "lang"=>"required"
         );
@@ -83,6 +76,5 @@ class MealController extends Controller
             $items_per_page = $totalItems;
         }        
         return ['meta'=>['currentPage'=>$currentPage,'totalItems'=>$totalItems,'totalPages'=>$totalPages,'itemsPerPage'=>$items_per_page],'data'=>$meals,'links'=>['prev'=>$prev,'self'=>$self,'next'=>$next]];
-        
     }
 }

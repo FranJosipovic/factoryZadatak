@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Astrotomic\Translatable\Translatable;
 
-class Meal extends Model
+class Meal extends Model implements TranslatableContract
 {
     use HasFactory,SoftDeletes;
     public function tags(){
@@ -21,4 +23,8 @@ class Meal extends Model
     }
 
     protected $hidden = ['created_at','deleted_at','updated_at','category_id'];
+
+    use Translatable;
+    
+    public $translatedAttributes = ['title', 'description'];
 }
