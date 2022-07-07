@@ -18,6 +18,7 @@ class MealController extends Controller
             --napravio sam observer i napravio potrebne promjene u EventServiceProvider, zbog linije koda u boot funkciji ne radi program pa sam ga zakomentiro i zbog
             toga sam manualno updato status u tablici u bazi podataka na 'deleted' za one koji su obrisani
             --ako nema with parametra javlja gresku pa sam morao dodati dodatne if else uvjete, vjerujem da se moglo drukcije i jednostavnije
+            --pokušao sam i translatable, ali ne znam kako da seedam mealTranslations tablicu
         */
         $rules = array(
             "lang"=>"required"
