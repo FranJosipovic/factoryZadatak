@@ -41,17 +41,15 @@ class MealController extends Controller
         $category = request('category');
         $diff_time = request('diff_time');
 
-        if($tags){
-            $tagWithMeals = Tag::with('meals')->whereIn('id',[$tags])->get()->first();
-            $mealsArray = $tagWithMeals->meals;
+        if($tags || $category){
             if($with){
-                foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->orWhere("category_id",$category)->with(explode(",",$with))->get();
-                }
+                $meals = Meal::whereHas('tags',function($query){
+                    $query->whereIn('id',[request('tags')]);
+                })->orWhere("category_id",$category)->with(explode(",",$with))->get();
             }else{
-                foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->orWhere("category_id",$category)->get();
-                }
+                $meals = Meal::whereHas('tags',function($query){
+                    $query->whereIn('id',[request('tags')]);
+                })->orWhere("category_id",$category)->get();
             }
         }
         
@@ -64,7 +62,7 @@ class MealController extends Controller
             }
         }
 
-        $totalItems = count($mealsArray);
+        $totalItems = count($meals);
 
         if($items_per_page = request('per_page') && $currentPage = request('page')){
             $totalPages = $items_per_page > $totalItems ? 1 : $totalItems%$items_per_page + floor($totalItems/$items_per_page);
