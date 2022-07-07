@@ -46,20 +46,12 @@ class MealController extends Controller
             $mealsArray = $tagWithMeals->meals;
             if($with){
                 foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->with(explode(",",$with))->get();
+                    $meals[] = Meal::where('id',$meal->id)->orWhere("category_id",$category)->with(explode(",",$with))->get();
                 }
             }else{
                 foreach($mealsArray as $meal){
-                    $meals[] = Meal::where('id',$meal->id)->get();
+                    $meals[] = Meal::where('id',$meal->id)->orWhere("category_id",$category)->get();
                 }
-            }
-        }
-        
-        if($category){
-            if($with){
-                $meals[] = Meal::where("category_id",$category)->with(explode(",",$with))->get();
-            }else{
-                $meals[] = Meal::where("category_id",$category)->get();
             }
         }
         
@@ -71,8 +63,6 @@ class MealController extends Controller
                 $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->get();
             }
         }
-
-        
 
         $totalItems = count($mealsArray);
 
