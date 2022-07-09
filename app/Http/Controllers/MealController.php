@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Meal;
 use Validator;
+use Illuminanate\Pagination\Paginator;
+use Illuminate\Contracts\Support\Jsonable;
 
 class MealController extends Controller
 {
@@ -33,9 +35,12 @@ class MealController extends Controller
         $with = request('with');
         $tags = request('tags');
         $category = request('category');
-        $diff_time = request('diff_time');
+        $diff_time = request('diff_time');        
+        $items_per_page = request('per_page');
 
+        app()->setLocale($lang);
         if($tags || $category){
+            
             if($with){
                 $meals = Meal::whereHas('tags',function($query){
                     $query->whereIn('id',[request('tags')]);
@@ -54,11 +59,10 @@ class MealController extends Controller
             else{
                 $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->get();
             }
-        }
+        }        
 
         $totalItems = count($meals);
-
-        if($items_per_page = request('per_page') && $currentPage = request('page')){
+        if($items_per_page && $currentPage = request('page')){
             $totalPages = $items_per_page > $totalItems ? 1 : $totalItems%$items_per_page + floor($totalItems/$items_per_page);
 
             $prevPage = $currentPage - 1;
@@ -76,6 +80,7 @@ class MealController extends Controller
             $next = null;
             $items_per_page = $totalItems;
         }        
+        //return $meals;
         return ['meta'=>['currentPage'=>$currentPage,'totalItems'=>$totalItems,'totalPages'=>$totalPages,'itemsPerPage'=>$items_per_page],'data'=>$meals,'links'=>['prev'=>$prev,'self'=>$self,'next'=>$next]];
     }
 }

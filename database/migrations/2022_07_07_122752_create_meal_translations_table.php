@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('description');
 
             $table->unique(['meal_id', 'locale']);
-            $table->foreignId('meal_id')->constrained();
+            $table->foreignId('meal_id')->constrained('meals')->onUpdate('cascade')->onDelete('cascade')->nullable();
         });
     }
 
