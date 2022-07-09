@@ -40,25 +40,23 @@ class MealController extends Controller
 
         app()->setLocale($lang);
         if($tags || $category){
-            
-            if($with){
-                $meals = Meal::whereHas('tags',function($query){
-                    $query->whereIn('id',[request('tags')]);
-                })->orWhere("category_id",$category)->with(explode(",",$with))->get();
-            }else{
-                $meals = Meal::whereHas('tags',function($query){
-                    $query->whereIn('id',[request('tags')]);
-                })->orWhere("category_id",$category)->get();
-            }
+
+            $meals = $with ? 
+            Meal::whereHas('tags',function($query){
+                $query->whereIn('id',[request('tags')]);
+            })->orWhere("category_id",$category)->with(explode(",",$with))->get()
+            :
+            Meal::whereHas('tags',function($query){
+                $query->whereIn('id',[request('tags')]);
+            })->orWhere("category_id",$category)->get();
         }
         
         if($diff_time){
-            if($with){
-                $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->with(explode(",",$with))->get();
-            }
-            else{
-                $meals [] = Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->get();
-            }
+
+            $meals[] = $with ? 
+            Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->with(explode(",",$with))->get()
+            :
+            Meal::withTrashed()->where("deleted_at", ">",$diff_time)->orWhere("created_at",">",$diff_time)->orWhere("updated_at",">",$diff_time)->get();
         }        
 
         $totalItems = count($meals);
