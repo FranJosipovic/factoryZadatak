@@ -22,7 +22,7 @@ class Meal extends Model implements TranslatableContract
         return $this->belongsTo(Category::class);
     }
 
-    protected $hidden = ['created_at','deleted_at','updated_at','category_id'];
+    protected $hidden = ['created_at','deleted_at','updated_at','category_id','translations'];
 
     use Translatable;
     
