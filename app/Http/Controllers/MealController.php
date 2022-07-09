@@ -18,9 +18,8 @@ class MealController extends Controller
         /*
             --koliko sam shvatio treba za validaciju postaviti da j elang required, ako treba još nešta dodao bi to u $rules
             --napravio sam observer i napravio potrebne promjene u EventServiceProvider, zbog linije koda u boot funkciji ne radi program pa sam ga zakomentiro i zbog
-            toga sam manualno updato status u tablici u bazi podataka na 'deleted' za one koji su obrisani
+            toga sam manualno updato status u tablici u bazi podataka na 'deleted' za one iteme koji su obrisani
             --ako nema with parametra javlja gresku pa sam morao dodati dodatne if else uvjete, vjerujem da se moglo drukcije i jednostavnije
-            --pokušao sam i translatable, ali ne znam kako da seedam mealTranslations tablicu
         */
         $rules = array(
             "lang"=>"required"
